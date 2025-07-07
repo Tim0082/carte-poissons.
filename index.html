@@ -1,26 +1,82 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Carte Poisson Partageable</title>
+  <title>Carte Poisson Nocturne</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 400px; width: 100%; }
-    #share-link { margin-top: 10px; word-break: break-all; }
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Fond bleu nuit et texte blanc */
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: #0b1a36; /* bleu nuit */
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-shadow: 0 0 5px #0ff;
+    }
+
+    /* Conteneur centré avec flex */
+    #container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Taille moyenne pour la carte */
+    #map {
+      width: 600px;
+      height: 400px;
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      box-shadow: 0 0 15px #0ff99a;
+      background: #011627;
+    }
+
+    button {
+      background-color: #0ff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #003344;
+      transition: background-color 0.3s ease;
+    }
+
+    button:disabled {
+      background-color: #055060;
+      cursor: not-allowed;
+      color: #88b8c9;
+    }
+
+    #share-link {
+      max-width: 600px;
+      word-break: break-word;
+      font-size: 0.9rem;
+      text-align: center;
+      text-shadow: 0 0 5px #0ff;
+    }
   </style>
 </head>
 <body>
-  <h1>Carte de Poissons</h1>
-  <div id="map"></div>
-  <button id="share-btn" disabled>Partager le poisson sélectionné</button>
-  <p id="share-link"></p>
+  <h1>Carte de Poissons Nocturne</h1>
+  <div id="container">
+    <div id="map"></div>
+    <button id="share-btn" disabled>Partager le poisson sélectionné</button>
+    <p id="share-link"></p>
+  </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Initialisation de la carte centrée sur la France
     const map = L.map('map').setView([46.5, 2.5], 6);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -28,7 +84,6 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Données des poissons avec position
     const poissons = [
       { id: 1, nom: 'Truite', coords: [46.5, 2.5] },
       { id: 2, nom: 'Brochet', coords: [48, 3] },
@@ -37,7 +92,6 @@
 
     let poissonSelectionne = null;
 
-    // Création des marqueurs sur la carte
     poissons.forEach(p => {
       const marker = L.marker(p.coords).addTo(map).bindPopup(p.nom);
       marker.on('click', () => {
@@ -47,23 +101,18 @@
       });
     });
 
-    // Partage du poisson sélectionné
     document.getElementById('share-btn').onclick = () => {
       if (!poissonSelectionne) return;
-      // Générer un lien avec paramètre poisson
       const url = `${window.location.origin}${window.location.pathname}?poisson=${poissonSelectionne.id}`;
       const shareLinkEl = document.getElementById('share-link');
       shareLinkEl.textContent = `Lien à partager : ${url}`;
-
-      // Copier le lien dans le presse-papier
       navigator.clipboard.writeText(url).then(() => {
         alert('Lien copié dans le presse-papier !');
       }).catch(() => {
-        alert('Impossible de copier le lien automatiquement, veuillez le copier manuellement.');
+        alert('Impossible de copier automatiquement, copie manuelle nécessaire.');
       });
     };
 
-    // Charger le poisson via l'URL si paramètre présent
     const urlParams = new URLSearchParams(window.location.search);
     const poissonId = urlParams.get('poisson');
     if (poissonId) {
