@@ -14,6 +14,7 @@
       align-items: center;
       padding: 20px;
       min-height: 100vh;
+      position: relative;
     }
     h1 {
       text-shadow: 0 0 5px #0ff;
@@ -24,9 +25,73 @@
       flex-wrap: wrap;
       justify-content: center;
       max-width: 900px;
-      margin: 20px 0;
+      margin: 20px 0 60px 0; /* espace en bas pour bouton */
     }
     .post {
       background: #011627;
       border: 2px solid #0ff;
       border-radius: 10px;
+      padding: 10px;
+      width: 200px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #0ff99a;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+    .post:hover {
+      transform: scale(1.05);
+    }
+    .post.selected {
+      border-color: #ff0;
+      box-shadow: 0 0 15px #ff0;
+    }
+    .post img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      background-color: #0ff;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #003344;
+      transition: background-color 0.3s ease;
+      margin-bottom: 10px;
+    }
+    button:disabled {
+      background-color: #055060;
+      cursor: not-allowed;
+      color: #88b8c9;
+    }
+    #share-link {
+      max-width: 600px;
+      word-break: break-word;
+      font-size: 0.9rem;
+      text-align: center;
+      text-shadow: 0 0 5px #0ff;
+      margin-bottom: 20px;
+    }
+
+    /* Bouton flottant + formulaire */
+
+    #add-post-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0ff;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 30px;
+      line-height: 50px;
+      color: #003344;
+      cursor: pointer;
+      box-shadow: 0 0 15px #0ff99a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select:
