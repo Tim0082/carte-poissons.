@@ -32,7 +32,7 @@
       border: 2px solid #0ff;
       border-radius: 10px;
       padding: 10px;
-      width: 200px;
+      width: 220px;
       cursor: pointer;
       box-shadow: 0 0 10px #0ff99a;
       text-align: center;
@@ -49,6 +49,12 @@
       max-width: 100%;
       border-radius: 8px;
       margin-bottom: 10px;
+    }
+    .post .info {
+      text-align: left;
+      font-size: 0.9rem;
+      line-height: 1.3;
+      margin-top: 5px;
     }
     button {
       background-color: #0ff;
@@ -96,6 +102,7 @@
       align-items: center;
       user-select: none;
       transition: background-color 0.3s ease;
+      z-index: 1000;
     }
     #add-post-btn:hover {
       background-color: #0cc;
@@ -107,9 +114,9 @@
       background-color: #011627;
       border: 2px solid #0ff;
       border-radius: 10px;
-      padding: 15px;
+      padding: 15px 20px 20px 20px;
       box-shadow: 0 0 15px #0ff99a;
-      width: 280px;
+      width: 320px;
       display: none;
       flex-direction: column;
       gap: 10px;
@@ -118,11 +125,19 @@
     #add-post-form label {
       font-size: 0.9rem;
     }
-    #add-post-form input {
+    #add-post-form input, 
+    #add-post-form textarea,
+    #add-post-form select {
       padding: 8px;
       border-radius: 5px;
       border: none;
       font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    #add-post-form textarea {
+      height: 60px;
     }
     #add-post-form button {
       padding: 10px;
@@ -147,6 +162,21 @@
       top: 5px;
       right: 10px;
     }
+    #add-post-form {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background-color: #011627;
+      border: 2px solid #0ff;
+      border-radius: 10px;
+      padding: 15px 20px 20px 20px;
+      box-shadow: 0 0 15px #0ff99a;
+      width: 320px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
@@ -159,12 +189,31 @@
   <button id="add-post-btn" title="Ajouter un poisson">+</button>
 
   <!-- Formulaire ajout -->
-  <form id="add-post-form">
+  <form id="add-post-form" novalidate>
     <button type="button" class="close-btn" title="Fermer">&times;</button>
     <label for="poisson-nom">Nom du poisson :</label>
     <input type="text" id="poisson-nom" required placeholder="Ex: Truite" />
+    
+    <label for="poisson-desc">Description :</label>
+    <textarea id="poisson-desc" required placeholder="Description du poisson..."></textarea>
+    
+    <label for="poisson-type">Type de poisson :</label>
+    <select id="poisson-type" required>
+      <option value="" disabled selected>Choisir un type</option>
+      <option value="Eau douce">Eau douce</option>
+      <option value="Eau de mer">Eau de mer</option>
+      <option value="Mixte">Mixte</option>
+    </select>
+
+    <label for="poisson-poids">Poids (kg) :</label>
+    <input type="number" id="poisson-poids" required min="0" step="0.01" placeholder="Ex: 3.5" />
+    
+    <label for="poisson-taille">Taille (cm) :</label>
+    <input type="number" id="poisson-taille" required min="0" step="0.1" placeholder="Ex: 45.2" />
+    
     <label for="poisson-image">URL image :</label>
     <input type="url" id="poisson-image" required placeholder="https://..." />
+
     <button type="submit">Ajouter</button>
   </form>
 
@@ -173,16 +222,28 @@
       {
         id: 1,
         nom: 'Truite',
+        description: 'Poisson d\'eau douce apprécié pour la pêche sportive.',
+        type: 'Eau douce',
+        poids: 2.5,
+        taille: 40,
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Salmo_trutta_MHNT_2003_1_2.jpg/220px-Salmo_trutta_MHNT_2003_1_2.jpg'
       },
       {
         id: 2,
         nom: 'Brochet',
+        description: 'Prédateur redoutable des eaux calmes et claires.',
+        type: 'Eau douce',
+        poids: 5,
+        taille: 70,
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Esox_lucius1.jpg/220px-Esox_lucius1.jpg'
       },
       {
         id: 3,
         nom: 'Carpe',
+        description: 'Poisson robuste, très présent dans les plans d\'eau.',
+        type: 'Eau douce',
+        poids: 7,
+        taille: 60,
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Carassius_carpio.jpg/220px-Carassius_carpio.jpg'
       }
     ];
@@ -198,6 +259,12 @@
       div.innerHTML = `
         <img src="${poisson.image}" alt="${poisson.nom}" />
         <strong>${poisson.nom}</strong>
+        <div class="info">
+          <p><em>${poisson.description}</em></p>
+          <p><strong>Type:</strong> ${poisson.type}</p>
+          <p><strong>Poids:</strong> ${poisson.poids} kg</p>
+          <p><strong>Taille:</strong> ${poisson.taille} cm</p>
+        </div>
       `;
       div.onclick = () => {
         document.querySelectorAll('.post').forEach(el => el.classList.remove('selected'));
@@ -235,7 +302,6 @@
     if (poissonId) {
       const p = poissons.find(po => po.id == poissonId);
       if (p) {
-        // Sélectionner dans la page
         setTimeout(() => {
           const posts = document.querySelectorAll('.post');
           posts.forEach(post => {
@@ -266,30 +332,13 @@
     addPostForm.onsubmit = e => {
       e.preventDefault();
       const nomInput = document.getElementById('poisson-nom');
+      const descInput = document.getElementById('poisson-desc');
+      const typeInput = document.getElementById('poisson-type');
+      const poidsInput = document.getElementById('poisson-poids');
+      const tailleInput = document.getElementById('poisson-taille');
       const imgInput = document.getElementById('poisson-image');
+
       const nom = nomInput.value.trim();
-      const image = imgInput.value.trim();
-
-      if (!nom || !image) {
-        alert('Merci de remplir tous les champs.');
-        return;
-      }
-
-      // Ajouter nouvel id unique
-      const newId = poissons.length ? Math.max(...poissons.map(p => p.id)) + 1 : 1;
-
-      const newPoisson = { id: newId, nom, image };
-      poissons.push(newPoisson);
-      renderPosts();
-
-      // Réinitialiser et fermer formulaire
-      nomInput.value = '';
-      imgInput.value = '';
-      addPostForm.style.display = 'none';
-
-      // Sélectionner le nouveau poisson et activer partage
-      setTimeout(() => {
-        const posts = document.querySelectorAll('.post');
-        posts.forEach(post => {
-          if (post.querySelector('strong').textContent === nom) {
-            post.classList.add('selected
+      const description = descInput.value.trim();
+      const type = typeInput.value;
+      const poids
