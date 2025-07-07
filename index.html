@@ -94,4 +94,202 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      user-select:
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #add-post-btn:hover {
+      background-color: #0cc;
+    }
+    #add-post-form {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background-color: #011627;
+      border: 2px solid #0ff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 0 15px #0ff99a;
+      width: 280px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    #add-post-form label {
+      font-size: 0.9rem;
+    }
+    #add-post-form input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      font-size: 1rem;
+    }
+    #add-post-form button {
+      padding: 10px;
+      background-color: #0ff;
+      color: #003344;
+      font-weight: bold;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+    #add-post-form button:hover {
+      background-color: #0cc;
+    }
+    #add-post-form .close-btn {
+      background: transparent;
+      color: #0ff;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border: none;
+      cursor: pointer;
+      position: absolute;
+      top: 5px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Poissons à partager</h1>
+  <div id="posts"></div>
+  <button id="share-btn" disabled>Partager le poisson sélectionné</button>
+  <p id="share-link"></p>
+
+  <!-- Bouton flottant -->
+  <button id="add-post-btn" title="Ajouter un poisson">+</button>
+
+  <!-- Formulaire ajout -->
+  <form id="add-post-form">
+    <button type="button" class="close-btn" title="Fermer">&times;</button>
+    <label for="poisson-nom">Nom du poisson :</label>
+    <input type="text" id="poisson-nom" required placeholder="Ex: Truite" />
+    <label for="poisson-image">URL image :</label>
+    <input type="url" id="poisson-image" required placeholder="https://..." />
+    <button type="submit">Ajouter</button>
+  </form>
+
+  <script>
+    const poissons = [
+      {
+        id: 1,
+        nom: 'Truite',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Salmo_trutta_MHNT_2003_1_2.jpg/220px-Salmo_trutta_MHNT_2003_1_2.jpg'
+      },
+      {
+        id: 2,
+        nom: 'Brochet',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Esox_lucius1.jpg/220px-Esox_lucius1.jpg'
+      },
+      {
+        id: 3,
+        nom: 'Carpe',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Carassius_carpio.jpg/220px-Carassius_carpio.jpg'
+      }
+    ];
+
+    const postsContainer = document.getElementById('posts');
+    const shareBtn = document.getElementById('share-btn');
+    const shareLinkEl = document.getElementById('share-link');
+    let selectedPoisson = null;
+
+    function createPost(poisson) {
+      const div = document.createElement('div');
+      div.className = 'post';
+      div.innerHTML = `
+        <img src="${poisson.image}" alt="${poisson.nom}" />
+        <strong>${poisson.nom}</strong>
+      `;
+      div.onclick = () => {
+        document.querySelectorAll('.post').forEach(el => el.classList.remove('selected'));
+        div.classList.add('selected');
+        selectedPoisson = poisson;
+        shareBtn.disabled = false;
+        shareLinkEl.textContent = '';
+      };
+      return div;
+    }
+
+    function renderPosts() {
+      postsContainer.innerHTML = '';
+      poissons.forEach(p => {
+        postsContainer.appendChild(createPost(p));
+      });
+    }
+
+    renderPosts();
+
+    shareBtn.onclick = () => {
+      if (!selectedPoisson) return;
+      const url = `${window.location.origin}${window.location.pathname}?poisson=${selectedPoisson.id}`;
+      shareLinkEl.textContent = `Lien à partager : ${url}`;
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Lien copié dans le presse-papier !');
+      }).catch(() => {
+        alert('Impossible de copier automatiquement, copie manuelle nécessaire.');
+      });
+    };
+
+    // Gérer le lien dans l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const poissonId = urlParams.get('poisson');
+    if (poissonId) {
+      const p = poissons.find(po => po.id == poissonId);
+      if (p) {
+        // Sélectionner dans la page
+        setTimeout(() => {
+          const posts = document.querySelectorAll('.post');
+          posts.forEach(post => {
+            if (post.querySelector('strong').textContent === p.nom) {
+              post.classList.add('selected');
+            }
+          });
+          selectedPoisson = p;
+          shareBtn.disabled = false;
+          shareLinkEl.textContent = `Poisson chargé via le lien : ${window.location.origin}${window.location.pathname}?poisson=${p.id}`;
+        }, 100);
+      }
+    }
+
+    // Bouton flottant + formulaire
+    const addPostBtn = document.getElementById('add-post-btn');
+    const addPostForm = document.getElementById('add-post-form');
+    const closeBtn = addPostForm.querySelector('.close-btn');
+
+    addPostBtn.onclick = () => {
+      addPostForm.style.display = addPostForm.style.display === 'flex' ? 'none' : 'flex';
+    };
+
+    closeBtn.onclick = () => {
+      addPostForm.style.display = 'none';
+    };
+
+    addPostForm.onsubmit = e => {
+      e.preventDefault();
+      const nomInput = document.getElementById('poisson-nom');
+      const imgInput = document.getElementById('poisson-image');
+      const nom = nomInput.value.trim();
+      const image = imgInput.value.trim();
+
+      if (!nom || !image) {
+        alert('Merci de remplir tous les champs.');
+        return;
+      }
+
+      // Ajouter nouvel id unique
+      const newId = poissons.length ? Math.max(...poissons.map(p => p.id)) + 1 : 1;
+
+      const newPoisson = { id: newId, nom, image };
+      poissons.push(newPoisson);
+      renderPosts();
+
+      // Réinitialiser et fermer formulaire
+      nomInput.value = '';
+      imgInput.value = '';
+      addPostForm.style.display = 'none';
+
+      // Sélectionner le nouveau poisson et activer partage
+      setTimeout(() => {
+        const posts = document.querySelectorAll('.post');
+        posts.forEach(post => {
+          if (post.querySelector('strong').textContent === nom) {
+            post.classList.add('selected
