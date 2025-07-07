@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Carte Poisson avec Images</title>
+  <title>Carte Poissons Hauts-de-France</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     body {
@@ -65,7 +65,7 @@
   </style>
 </head>
 <body>
-  <h1>Carte de Poissons avec Images</h1>
+  <h1>Carte de Poissons - Hauts-de-France</h1>
   <div id="container">
     <div id="map"></div>
     <button id="share-btn" disabled>Partager le poisson sélectionné</button>
@@ -74,80 +74,3 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([46.5, 2.5], 6);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    const poissons = [
-      {
-        id: 1,
-        nom: 'Truite',
-        coords: [46.5, 2.5],
-        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Salmo_trutta_MHNT_2003_1_2.jpg/220px-Salmo_trutta_MHNT_2003_1_2.jpg'
-      },
-      {
-        id: 2,
-        nom: 'Brochet',
-        coords: [48, 3],
-        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Esox_lucius1.jpg/220px-Esox_lucius1.jpg'
-      },
-      {
-        id: 3,
-        nom: 'Carpe',
-        coords: [47, 2],
-        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Carassius_carpio.jpg/220px-Carassius_carpio.jpg'
-      }
-    ];
-
-    let poissonSelectionne = null;
-    let markers = [];
-
-    poissons.forEach(p => {
-      const popupContent = `
-        <strong>${p.nom}</strong><br/>
-        <img class="popup-image" src="${p.image}" alt="${p.nom}" />
-      `;
-      const marker = L.marker(p.coords).addTo(map).bindPopup(popupContent);
-      marker.on('click', () => {
-        poissonSelectionne = p;
-        document.getElementById('share-btn').disabled = false;
-      });
-      markers.push(marker);
-    });
-
-    document.getElementById('share-btn').onclick = () => {
-      if (!poissonSelectionne) return;
-      const url = `${window.location.origin}${window.location.pathname}?poisson=${poissonSelectionne.id}`;
-      const shareLinkEl = document.getElementById('share-link');
-      shareLinkEl.textContent = `Lien à partager : ${url}`;
-      navigator.clipboard.writeText(url).then(() => {
-        alert('Lien copié dans le presse-papier !');
-      }).catch(() => {
-        alert('Impossible de copier automatiquement, copie manuelle nécessaire.');
-      });
-    };
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const poissonId = urlParams.get('poisson');
-    if (poissonId) {
-      const p = poissons.find(po => po.id == poissonId);
-      if (p) {
-        poissonSelectionne = p;
-        map.setView(p.coords, 10);
-        // Ouvrir la popup correspondante
-        const marker = markers.find(m => {
-          const latLng = m.getLatLng();
-          return latLng.lat === p.coords[0] && latLng.lng === p.coords[1];
-        });
-        if (marker) {
-          marker.openPopup();
-        }
-        alert('Poisson chargé via le lien : ' + p.nom);
-      }
-    }
-  </script>
-</body>
-</html>
